@@ -1,11 +1,15 @@
 const mongoose = require('mongoose');
 
 const quesSchema = mongoose.Schema({
-    id: mongoose.Schema.Types.ObjectId,
-    text: { type: String, required: true },
-    choices: { choice: { type:Array }},
-    answer: { type: number }
+    _id:mongoose.Schema.Types.ObjectId,
+    text:String,
+    choices:[{
+    	 id:mongoose.Schema.Types.ObjectId,
+         type:String
+    }],
+    answer:Number
 
 });
 
 module.exports = mongoose.model('Question', quesSchema);
+

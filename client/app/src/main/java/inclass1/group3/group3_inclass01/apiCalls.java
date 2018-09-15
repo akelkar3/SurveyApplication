@@ -119,9 +119,6 @@ if (this.token == null)
                                 }
                             });
                     }
-
-
-
                     Headers responseHeaders = response.headers();
                     for (int i = 0, size = responseHeaders.size(); i < size; i++) {
                         System.out.println(responseHeaders.name(i) + ": " + responseHeaders.value(i));
@@ -348,6 +345,73 @@ if (this.token == null)
         });
     }
 
+    public void saveResponse(int[] answers,int score) {
+        final OkHttpClient client = new OkHttpClient();
+        RequestBody formBody = new FormBody.Builder()
+                .add("score", String.valueOf(score))
+                .add("answers", answers.toString())
+                .build();
+        Request request = new Request.Builder()
+                .url(remoteIP+"/user/signup")
+                .addHeader("Authorization","BEARER "+getToken())
+                .put(formBody)
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Log.d(TAG, "onFailure getMessages: ");
+            }
+
+            @Override
+            public void onResponse(Call call, final Response response) throws IOException {
+                String str;
+                try (ResponseBody responseBody = response.body()) {
+                    if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+
+                    Headers responseHeaders = response.headers();
+
+                    //System.out.println(responseBody.string());
+                    str=responseBody.string();
+                }
+                // str= response.body().string();
+                Log.d(TAG, "onResponse get userprofile: "+str );
+                Gson gson = new Gson();
+
+                final ResponseApi result=  (ResponseApi) gson.fromJson(str, ResponseApi.class); // Fails to deserialize foo.value as Bar
+
+                if (!result.getMessage().isEmpty()) {
+                    //  Log.d(TAG, "onResponse: get messages "+result.messages.size());
+                    Toast.makeText(activity, result.getMessage(), Toast.LENGTH_SHORT).show();
+                    //  saveToken(result.token.toString(),result.getUserFullName(),result.getUser_id());
+                }
+
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (!result.status.equalsIgnoreCase("200")) {
+                            Toast.makeText(activity, result.getMessage(), Toast.LENGTH_SHORT).show();
+                        }else {
+                            Log.d(TAG, "run: show profile data :"+result.toString());
+
+                            Toast.makeText(activity,"Your response has been received",Toast.LENGTH_SHORT);
+                            //  threadsAdapter.notifyDataSetChanged();
+                            //    WelcomeActivity.showProfile(result.getUser_fname(),result.getAge(),result.getWeight(),result.getAddress());
+                            TextView Name,Age,Address,Weight;
+
+                            Name= activity.findViewById(R.id.questionText);
+                          Name.setText("Thank You");
+                        }
+                        //   Toast.makeText(activity, "token created successfully", Toast.LENGTH_SHORT).show();
+                        //do something more.
+
+                        Log.d(TAG, "run: accessing ui " );
+                    }
+                });
+            }
+        });
+    }
+
 //    public void getThreads(String token,String currentUserId1)
 //    {
 //        final String currentUserId= currentUserId1;
@@ -472,158 +536,158 @@ if (this.token == null)
 //
 //        });
 //
+   }
+//    public void getUserProfile(String token, final String userID)
+//    {
+//       // final String currentUserId= currentUserId1;
+//      //  token=this.token;
+//        final OkHttpClient client = new OkHttpClient();
+//        Request request = new Request.Builder()
+//                .url(remoteIP+"/user/profile")
+//                .addHeader("Authorization","BEARER "+token)
+//
+//                .build();
+//
+//        client.newCall(request).enqueue(new Callback() {
+//            @Override
+//            public void onFailure(Call call, IOException e) {
+//                Log.d(TAG, "onFailure getMessages: ");
+//            }
+//
+//            @Override
+//            public void onResponse(Call call, final Response response) throws IOException {
+//                String str;
+//                try (ResponseBody responseBody = response.body()) {
+//                    if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+//
+//                    Headers responseHeaders = response.headers();
+//
+//                    //System.out.println(responseBody.string());
+//                    str=responseBody.string();
+//                }
+//                // str= response.body().string();
+//                Log.d(TAG, "onResponse get userprofile: "+str );
+//                Gson gson = new Gson();
+//
+//                final ResponseApi result=  (ResponseApi) gson.fromJson(str, ResponseApi.class); // Fails to deserialize foo.value as Bar
+//
+//                if (!result.getMessage().isEmpty()) {
+//                  //  Log.d(TAG, "onResponse: get messages "+result.messages.size());
+//                    Toast.makeText(activity, result.getMessage(), Toast.LENGTH_SHORT).show();
+//                    //  saveToken(result.token.toString(),result.getUserFullName(),result.getUser_id());
+//                }
+//
+//                activity.runOnUiThread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        if (!result.getMessage().isEmpty()) {
+//                            Toast.makeText(activity, result.getMessage(), Toast.LENGTH_SHORT).show();
+//                        }else {
+//                            Log.d(TAG, "run: show profile data :"+result.toString());
+//
+//                          Toast.makeText(activity,result.getUser_fname()+result.getStatus(),Toast.LENGTH_SHORT);
+//                            //  threadsAdapter.notifyDataSetChanged();
+//                        //    WelcomeActivity.showProfile(result.getUser_fname(),result.getAge(),result.getWeight(),result.getAddress());
+//                            EditText Name,Age,Address,Weight;
+//
+//                           Name= activity .findViewById(R.id.proname);
+//                            Age=activity.findViewById(R.id.proage);
+//                            Address = activity.findViewById(R.id.proaddress);
+//                            Weight= activity.findViewById(R.id.proweight);
+//                            Name.setText(result.getUser_fname());
+//                            Age.setText(result.getAge());
+//                            Address.setText(result.getAddress());
+//                            Weight.setText(result.getWeight());
+//                            Log.d(TAG, "profile "+ result.getAddress()+" "+ result.getAge());
+//                        }
+//                        //   Toast.makeText(activity, "token created successfully", Toast.LENGTH_SHORT).show();
+//                        //do something more.
+//
+//                        Log.d(TAG, "run: accessing ui " );
+//                    }
+//                });
+//            }
+//        });
+//
 //    }
-    public void getUserProfile(String token, final String userID)
-    {
-       // final String currentUserId= currentUserId1;
-      //  token=this.token;
-        final OkHttpClient client = new OkHttpClient();
-        Request request = new Request.Builder()
-                .url(remoteIP+"/user/profile")
-                .addHeader("Authorization","BEARER "+token)
-
-                .build();
-
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                Log.d(TAG, "onFailure getMessages: ");
-            }
-
-            @Override
-            public void onResponse(Call call, final Response response) throws IOException {
-                String str;
-                try (ResponseBody responseBody = response.body()) {
-                    if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
-
-                    Headers responseHeaders = response.headers();
-
-                    //System.out.println(responseBody.string());
-                    str=responseBody.string();
-                }
-                // str= response.body().string();
-                Log.d(TAG, "onResponse get userprofile: "+str );
-                Gson gson = new Gson();
-
-                final ResponseApi result=  (ResponseApi) gson.fromJson(str, ResponseApi.class); // Fails to deserialize foo.value as Bar
-
-                if (!result.getMessage().isEmpty()) {
-                  //  Log.d(TAG, "onResponse: get messages "+result.messages.size());
-                    Toast.makeText(activity, result.getMessage(), Toast.LENGTH_SHORT).show();
-                    //  saveToken(result.token.toString(),result.getUserFullName(),result.getUser_id());
-                }
-
-                activity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (!result.getMessage().isEmpty()) {
-                            Toast.makeText(activity, result.getMessage(), Toast.LENGTH_SHORT).show();
-                        }else {
-                            Log.d(TAG, "run: show profile data :"+result.toString());
-
-                          Toast.makeText(activity,result.getUser_fname()+result.getStatus(),Toast.LENGTH_SHORT);
-                            //  threadsAdapter.notifyDataSetChanged();
-                        //    WelcomeActivity.showProfile(result.getUser_fname(),result.getAge(),result.getWeight(),result.getAddress());
-                            EditText Name,Age,Address,Weight;
-
-                           Name= activity .findViewById(R.id.proname);
-                            Age=activity.findViewById(R.id.proage);
-                            Address = activity.findViewById(R.id.proaddress);
-                            Weight= activity.findViewById(R.id.proweight);
-                            Name.setText(result.getUser_fname());
-                            Age.setText(result.getAge());
-                            Address.setText(result.getAddress());
-                            Weight.setText(result.getWeight());
-                            Log.d(TAG, "profile "+ result.getAddress()+" "+ result.getAge());
-                        }
-                        //   Toast.makeText(activity, "token created successfully", Toast.LENGTH_SHORT).show();
-                        //do something more.
-
-                        Log.d(TAG, "run: accessing ui " );
-                    }
-                });
-            }
-        });
-
-    }
-
-    public void saveUserProfile(String name, String age, String w, String add) {
-        // final String currentUserId= currentUserId1;
-        //  token=this.token;
-        final OkHttpClient client = new OkHttpClient();
-        RequestBody formBody = new FormBody.Builder()
-
-
-                .add("name", name)
-                .add("age", age)
-                .add("weight", w)
-                .add("address", add)
-                .build();
-        Request request = new Request.Builder()
-                .url(remoteIP+"/user/profile/edit")
-                .addHeader("Authorization","BEARER "+getToken())
-                .put(formBody)
-                .build();
-
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                Log.d(TAG, "onFailure getMessages: ");
-            }
-
-            @Override
-            public void onResponse(Call call, final Response response) throws IOException {
-                String str;
-                try (ResponseBody responseBody = response.body()) {
-                    if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
-
-                    Headers responseHeaders = response.headers();
-
-                    //System.out.println(responseBody.string());
-                    str=responseBody.string();
-                }
-                // str= response.body().string();
-                Log.d(TAG, "onResponse get userprofile: "+str );
-                Gson gson = new Gson();
-
-                final ResponseApi result=  (ResponseApi) gson.fromJson(str, ResponseApi.class); // Fails to deserialize foo.value as Bar
-
-                if (!result.getMessage().isEmpty()) {
-                    //  Log.d(TAG, "onResponse: get messages "+result.messages.size());
-                    Toast.makeText(activity, result.getMessage(), Toast.LENGTH_SHORT).show();
-                    //  saveToken(result.token.toString(),result.getUserFullName(),result.getUser_id());
-                }
-
-                activity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (!result.getMessage().isEmpty()) {
-                            Toast.makeText(activity, result.getMessage(), Toast.LENGTH_SHORT).show();
-                        }else {
-                            Log.d(TAG, "run: show profile data :"+result.toString());
-
-                            Toast.makeText(activity,result.getUser_fname()+result.getStatus(),Toast.LENGTH_SHORT);
-                            //  threadsAdapter.notifyDataSetChanged();
-                            //    WelcomeActivity.showProfile(result.getUser_fname(),result.getAge(),result.getWeight(),result.getAddress());
-                            EditText Name,Age,Address,Weight;
-
-                            Name= activity .findViewById(R.id.proname);
-                            Age=activity.findViewById(R.id.proage);
-                            Address = activity.findViewById(R.id.proaddress);
-                            Weight= activity.findViewById(R.id.proweight);
-                            Name.setText(result.getUser_fname());
-                            Age.setText(result.getAge());
-                            Address.setText(result.getAddress());
-                            Weight.setText(result.getWeight());
-                            Log.d(TAG, "profile "+ result.getAddress()+" "+ result.getAge());
-                        }
-                        //   Toast.makeText(activity, "token created successfully", Toast.LENGTH_SHORT).show();
-                        //do something more.
-
-                        Log.d(TAG, "run: accessing ui " );
-                    }
-                });
-            }
-        });
-    }
-}
+//
+//    public void saveUserProfile(String name, String age, String w, String add) {
+//        // final String currentUserId= currentUserId1;
+//        //  token=this.token;
+//        final OkHttpClient client = new OkHttpClient();
+//        RequestBody formBody = new FormBody.Builder()
+//
+//
+//                .add("name", name)
+//                .add("age", age)
+//                .add("weight", w)
+//                .add("address", add)
+//                .build();
+//        Request request = new Request.Builder()
+//                .url(remoteIP+"/user/profile/edit")
+//                .addHeader("Authorization","BEARER "+getToken())
+//                .put(formBody)
+//                .build();
+//
+//        client.newCall(request).enqueue(new Callback() {
+//            @Override
+//            public void onFailure(Call call, IOException e) {
+//                Log.d(TAG, "onFailure getMessages: ");
+//            }
+//
+//            @Override
+//            public void onResponse(Call call, final Response response) throws IOException {
+//                String str;
+//                try (ResponseBody responseBody = response.body()) {
+//                    if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+//
+//                    Headers responseHeaders = response.headers();
+//
+//                    //System.out.println(responseBody.string());
+//                    str=responseBody.string();
+//                }
+//                // str= response.body().string();
+//                Log.d(TAG, "onResponse get userprofile: "+str );
+//                Gson gson = new Gson();
+//
+//                final ResponseApi result=  (ResponseApi) gson.fromJson(str, ResponseApi.class); // Fails to deserialize foo.value as Bar
+//
+//                if (!result.getMessage().isEmpty()) {
+//                    //  Log.d(TAG, "onResponse: get messages "+result.messages.size());
+//                    Toast.makeText(activity, result.getMessage(), Toast.LENGTH_SHORT).show();
+//                    //  saveToken(result.token.toString(),result.getUserFullName(),result.getUser_id());
+//                }
+//
+//                activity.runOnUiThread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        if (!result.getMessage().isEmpty()) {
+//                            Toast.makeText(activity, result.getMessage(), Toast.LENGTH_SHORT).show();
+//                        }else {
+//                            Log.d(TAG, "run: show profile data :"+result.toString());
+//
+//                            Toast.makeText(activity,result.getUser_fname()+result.getStatus(),Toast.LENGTH_SHORT);
+//                            //  threadsAdapter.notifyDataSetChanged();
+//                            //    WelcomeActivity.showProfile(result.getUser_fname(),result.getAge(),result.getWeight(),result.getAddress());
+//                            EditText Name,Age,Address,Weight;
+//
+//                            Name= activity .findViewById(R.id.proname);
+//                            Age=activity.findViewById(R.id.proage);
+//                            Address = activity.findViewById(R.id.proaddress);
+//                            Weight= activity.findViewById(R.id.proweight);
+//                            Name.setText(result.getUser_fname());
+//                            Age.setText(result.getAge());
+//                            Address.setText(result.getAddress());
+//                            Weight.setText(result.getWeight());
+//                            Log.d(TAG, "profile "+ result.getAddress()+" "+ result.getAge());
+//                        }
+//                        //   Toast.makeText(activity, "token created successfully", Toast.LENGTH_SHORT).show();
+//                        //do something more.
+//
+//                        Log.d(TAG, "run: accessing ui " );
+//                    }
+//                });
+//            }
+//        });
+//    }
+//}

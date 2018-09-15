@@ -13,13 +13,15 @@ router.post("/login", UserController.user_login);
 router.get("/profile",checkAuth, UserProfile.getProfile);
 
 router.put("/profile/submit",checkAuth,UserProfile.saveResponse);
-router.get("/profile/showresult",checkAuth, UserProfile.getResult);
+
+//to fetch user survey
+router.post("/profile/showsurvey",UserProfile.getUserSurvey);
 
 //admin profile: show user list
-router.get("/profile/showusers",checkAuth, UserProfile.getUserList);
+router.get("/profile/showusers",UserProfile.getUserList);
 
-
-router.put("/profile/edit",checkAuth,UserProfile.editProfile);
+//add user response
+router.put("/profile/postResponse",checkAuth,UserProfile.postSurveyResponse);
 
 router.delete("/:userId", checkAuth, UserController.user_delete);
 

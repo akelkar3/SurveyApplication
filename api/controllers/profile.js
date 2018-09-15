@@ -15,9 +15,6 @@ module.exports.getProfile = function(req, res){
       .exec(function(err, user) {
         res.status(200).json(
         user
-       // {message:"Request successful",
-        //user:user,
-        //status:200}
         )
       });
   }
@@ -31,11 +28,6 @@ module.exports.saveResponse = function(req,res){
     {
       $set:{
         survey:req.body.survey,
-
-        //calculate score and save to db ??
-
-
-
         score: 22
       }
     },
@@ -60,67 +52,48 @@ module.exports.saveResponse = function(req,res){
 
 };
 
-//get User result score
-module.exports.getResult = function(req, res){
-  const id=req.userData.userId;
-  if (!id) {
-    res.status(401).json({
-      "message" : "UnauthorizedError: private profile"
+//get User survey result
+module.exports.getUserSurvey = function(req, res){
+   
+    User.find({_id:req.body._id,surveyId:req.body.surveyId},'answers',function(err, user) 
+     {
+      if(err)
+       {
+        res.status(200).json({
+          error:err,
+          message:"Request unsuccessful",
+          status:500
+        });
+      }else{
+          res.status(200).json({
+          message:"Request successful",
+          user,
+          status:200
+          });
+          
+      }
     });
-  } else {
-    User
-      .findById(id)
-      .exec(function(err, user) {
+  };
 
-
-        res.status(200).json(
-
-       // {message:"Request successful",
-        //user:user,
-        //status:200}
-
-        {
-
-        //check ??
-        score:score,
-        status:200
-        }
-
-        )
-      });
-  }
-};
 
 
 //fetch all user list for admin to see in profile landing page
 module.exports.getUserList = function(req,res){
-  const id=req.userData.userId;
-  User.find(
-    id,
-    {
-      $set:{
-        name:req.body.name,
-        age:req.body.age,
-        weight:req.body.weight,
-        address:req.body.address
-      }
-    },
-    {new: true},
-    function(err,result){
+  User.find({},['surveyId','score'],function(err,users){
     if(err){
       console.log(err);
       res.status(500).json({
         error:err,
+        message:"Request unsuccessful",
         status:500
       });
     }else{
-      console.log(result);
-      res.status(200).json(
-    //  message:"Request successful",
-      result
-      //status:200
-      );
-     // console.log(result);
+      //console.log(users);
+      res.status(200).json({
+      message:"Request successful",
+      users,
+      status:200
+      });
     }
     });
 
@@ -129,16 +102,18 @@ module.exports.getUserList = function(req,res){
 
 
 
-module.exports.editProfile = function(req,res){
+module.exports.postSurveyResponse = function(req,res){
   const id=req.userData.userId;
+ 
   User.findByIdAndUpdate(
     id,
     {
       $set:{
         name:req.body.name,
-        age:req.body.age,
-        weight:req.body.weight,
-        address:req.body.address
+        surveyId:new mongoose.Types.ObjectId(),
+        role:req.body.role,
+        score:req.body.score,
+        answers:req.body.answers
       }
     },
     {new: true},
@@ -147,15 +122,16 @@ module.exports.editProfile = function(req,res){
       console.log(err);
       res.status(500).json({
         error:err,
+        message:"Request unsuccessful",
         status:500
       });
     }else{
+     // console.log("survey saved:"+survey);
       console.log(result);
-      res.status(200).json(
-    //  message:"Request successful",
-      result
-      //status:200
-      );
+      res.status(200).json({
+       message:"Request successful",
+       status:200
+     } );
      // console.log(result);
     }
     });
